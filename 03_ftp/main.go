@@ -2,9 +2,9 @@ package main
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -84,30 +84,43 @@ func zipit(source, target string) error {
 }
 
 func main() {
-	err := zipit("/var/www/www.balloonssrl.com", "/tmp/balloons_settimanale.zip")
+	/* err := zipit("/var/www/www.balloonssrl.com", "/tmp/balloons_settimanale.zip")
 	if err != nil {
 		log.Println(err)
-	}
+	} */
 
-	c, err := ftp.Dial("xxxxxxxxxxxxxx:21", ftp.DialWithTimeout(5*time.Second))
+	c, err := ftp.Dial("xxxxx:21", ftp.DialWithTimeout(5*time.Second))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// login
-	err = c.Login("suususu", "xxxxxxxxxxxxxx")
+	err = c.Login("xxxxx", "xxxxxx")
 	if err != nil {
 		log.Fatal(err)
 	}
 	// Do something with the FTP conn
 	// data := bytes.NewBufferString("Hello World")
-	data, err := ioutil.ReadFile("/tmp/balloons_settimanale.zip")
+	/*
+		data, err := ioutil.ReadFile("/tmp/balloons_settimanale.zip")
+		if err != nil {
+			panic(err)
+		}
+	*/
+	file, err := os.Open("/tmp/balloons_settimanale.zip")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	err = c.Stor("/Backup_VPS/balloons_settimanale.zip", bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
+	scanner := bufio.NewScanner(file)
+	buf := make([]byte, 0, 1024*1024)
+	scanner.Buffer(buf, 10*1024*1024)
+
+	for scanner.Scan() {
+		print(scanner.Bytes())
+		err = c.Append("/Backup_VPS/balloons_settimanale.zip", bytes.NewBuffer(scanner.Bytes()))
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	if err := c.Quit(); err != nil {

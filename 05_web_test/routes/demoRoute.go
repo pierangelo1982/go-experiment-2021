@@ -15,16 +15,16 @@ import (
 var driver struct{ models.Driver }
 
 func HomePage(w http.ResponseWriter, req *http.Request) {
-	//fmt.Println(driver)
 	db := config.DatabaseConnection()
-	rows, err := db.Query(`SELECT "id", "firstName", "lastName", "carNumber" FROM "Driver"`)
+	rows, err := db.Query(`SELECT d."id", d."firstName", d."lastName", d."carNumber", json_agg(json_build_object('name', country)) AS owner FROM "Driver" AS d LEFT JOIN "Team" AS t 
+    ON d."teamId" = t."id" GROUP BY d."id";`)
 	if err != nil {
 		panic(err)
 	}
 
 	var d []models.Driver
 	for rows.Next() {
-		err = rows.Scan(&driver.Id, &driver.FirstName, &driver.LastName, &driver.CarNumber)
+		err = rows.Scan(&driver.Id, &driver.FirstName, &driver.LastName, &driver.CarNumber, &driver.Owner)
 		if err != nil {
 			panic(err)
 		}

@@ -13,18 +13,23 @@ import (
 )
 
 var driver struct{ models.Driver }
+var team struct{ models.Team }
 
 func HomePage(w http.ResponseWriter, req *http.Request) {
 	db := config.DatabaseConnection()
-	rows, err := db.Query(`SELECT d."id", d."firstName", d."lastName", d."carNumber", json_agg(json_build_object('name', country)) AS owner FROM "Driver" AS d LEFT JOIN "Team" AS t 
-    ON d."teamId" = t."id" GROUP BY d."id";`)
+	customQuery := `
+		SELECT c.id, c."firstName", c."lastName", c."carNumber", c."teamId", json_agg(json_build_object(name, country)) AS owner FROM "Driver" AS c 
+    	LEFT JOIN "Team" AS t ON t."id"=c."teamId" GROUP BY c."id"
+	`
+	rows, err := db.Query(customQuery)
 	if err != nil {
 		panic(err)
 	}
 
 	var d []models.Driver
+
 	for rows.Next() {
-		err = rows.Scan(&driver.Id, &driver.FirstName, &driver.LastName, &driver.CarNumber, &driver.Owner)
+		err = rows.Scan(&driver.Id, &driver.FirstName, &driver.LastName, &driver.CarNumber, &driver.TeamId, &driver.Owner)
 		if err != nil {
 			panic(err)
 		}

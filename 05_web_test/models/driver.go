@@ -1,7 +1,7 @@
 package models
 
 type Team struct {
-	Id      string `json:"id"`
+	//Id      string `json:"id"`
 	Name    string `json:"name"`
 	Country string `json:"country"`
 }
@@ -12,5 +12,5 @@ type Driver struct {
 	LastName  string `json:"lastName"`
 	CarNumber int    `json:"carNumber"`
 	TeamId    int    `json:"teamId"`
-	Owner     Team
+	Owner     Team   `json:"owner"`
 }
